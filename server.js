@@ -75,7 +75,7 @@ post4.save();
 
 // 1) to handle getting all posts and their comments
 app.get('/posts', function(request, response, next) {
-    Post.find({}).select('text comments -_id').exec(function(err, posts) {
+    Post.find({}).select('text comments').exec(function(err, posts) {
         if (err) {
             console.log(err);
         } else {
