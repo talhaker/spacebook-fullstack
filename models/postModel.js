@@ -13,7 +13,7 @@ let commentSchema = new mongoose.Schema({
 
 // A post can have zero or more child comments
 let postSchema = new mongoose.Schema({
-    postText: String,
+    text: String,
     comments: [commentSchema]
 });
 
