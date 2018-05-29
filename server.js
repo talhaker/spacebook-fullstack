@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 
 const SERVER_PORT = 8080;
 
@@ -75,7 +76,7 @@ post4.save();
 
 // 1) to handle getting all posts and their comments
 app.get('/posts', function(request, response, next) {
-    Post.find({}).select('text comments -_id').exec(function(err, posts) {
+    Post.find({}).select('text comments').exec(function(err, posts) {
         if (err) {
             console.log(err);
         } else {
@@ -86,7 +87,27 @@ app.get('/posts', function(request, response, next) {
 
 
 // 2) to handle adding a post
+app.post('/posts', function(request, response, next) {
+    let newPost = {
+        text: request.body.text,
+        comments: []
+    }
+
+    let post = new Post(newPost);
+    post.save();
+    newPost._id = post._id;
+    response.send(newPost);
+});
+
+
 // 3) to handle deleting a post
+app.delete('/posts/:postId', function(request, response, next) {
+    Post.findByIdAndRemove(postId, function(postId) {
+        response.send(postId);
+    });
+});
+
+
 // 4) to handle adding a comment to a post
 // 5) to handle deleting a comment from a post
 
