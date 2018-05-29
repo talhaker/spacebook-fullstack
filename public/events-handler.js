@@ -24,9 +24,19 @@ class EventsHandler {
 
     registerRemovePost() {
         this.$posts.on('click', '.remove-post', (event) => {
-            let index = $(event.currentTarget).closest('.post').index();;
-            this.postsRepository.removePost(index);
-            this.postsRenderer.renderPosts(this.postsRepository.posts);
+            let self = this;
+            let index = $(event.currentTarget).closest('.post').index();
+            let postId = $(event.currentTarget).closest('.post').data('id');
+            $.ajax('/posts/' + postId, {
+                method: "DELETE",
+                success: function(postId) {
+                    self.postsRepository.removePost(index);
+                    self.postsRenderer.renderPosts(self.postsRepository.posts);
+                },
+                error: function(err) {
+                    console.log('Error: ' + err);
+                }
+            });
         });
 
     }

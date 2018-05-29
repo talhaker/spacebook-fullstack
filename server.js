@@ -101,6 +101,13 @@ app.post('/posts', function(request, response, next) {
 
 
 // 3) to handle deleting a post
+app.delete('/posts/:postId', function(request, response, next) {
+    Post.findByIdAndRemove(postId, function(postId) {
+        response.send(postId);
+    });
+});
+
+
 // 4) to handle adding a comment to a post
 // 5) to handle deleting a comment from a post
 
