@@ -74,11 +74,23 @@ class EventsHandler {
 
     registerRemoveComment() {
         this.$posts.on('click', '.remove-comment', (event) => {
+            let self = this;
             let $commentsList = $(event.currentTarget).closest('.post').find('.comments-list');
+            let postId = $(event.currentTarget).closest('.post').data('id');
             let postIndex = $(event.currentTarget).closest('.post').index();
+            let commentId = $(event.currentTarget).closest('.comment').data('id');
             let commentIndex = $(event.currentTarget).closest('.comment').index();
-            this.postsRepository.deleteComment(postIndex, commentIndex);
-            this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
+
+            $.ajax('/posts/' + postId + '/comments/' + commentId, {
+                method: "DELETE",
+                success: (post) => {
+                    self.postsRepository.deleteComment(postIndex, commentIndex);
+                    self.postsRenderer.renderComments(self.postsRepository.posts, postIndex);
+                },
+                error: function(err) {
+                    console.log('Error: ' + err);
+                }
+            });
         });
     }
 }

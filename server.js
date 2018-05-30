@@ -102,14 +102,15 @@ app.post('/posts', (request, response, next) => {
 
 // 3) to handle deleting a post
 app.delete('/posts/:postId', (request, response, next) => {
-    Post.findByIdAndRemove(postId, function(postId) {
+    let postId = request.params.postId;
+    Post.findByIdAndRemove(postId, (postId) => {
         response.send(postId);
     });
 });
 
 
 // 4) to handle adding a comment to a post
-app.post('/posts/:postId/comments', function(request, response, next) {
+app.post('/posts/:postId/comments', (request, response, next) => {
     let newComment = {
         text: request.body.text,
         user: request.body.user
@@ -126,6 +127,15 @@ app.post('/posts/:postId/comments', function(request, response, next) {
 
 
 // 5) to handle deleting a comment from a post
+app.delete('/posts/:postId/comments/:commentId', (request, response, next) => {
+    let postId = request.params.postId;
+    let commentId = request.params.commentId;
+    Post.findByIdAndUpdate(postId, { $pull: { comments: { _id: [commentId] } } }, (err, post) => {
+        response.send(post);
+    });
+});
+
+
 
 app.listen(SERVER_PORT, () => {
     console.log("Server started on port " + SERVER_PORT);
