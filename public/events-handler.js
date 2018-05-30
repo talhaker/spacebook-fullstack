@@ -10,15 +10,15 @@ class EventsHandler {
             let $input = $("#postText");
             if ($input.val() === "") {
                 alert("Please enter text!");
-            } else {
-                let self = this;
-                $.post('/posts', { text: $input.val() }, function(newPost) {
-                    self.postsRepository.addPost(newPost);
-                    self.postsRenderer.renderPosts(self.postsRepository.posts);
-                    $input.val("");
-                });
-
+                return;
             }
+
+            let self = this;
+            $.post('/posts', { text: $input.val() }, (newPost) => {
+                self.postsRepository.addPost(newPost);
+                self.postsRenderer.renderPosts(self.postsRepository.posts);
+                $input.val("");
+            });
         });
     }
 
@@ -58,24 +58,39 @@ class EventsHandler {
                 return;
             }
 
+            let self = this;
+            let postId = $(event.currentTarget).closest('.post').data('id');
             let postIndex = $(event.currentTarget).closest('.post').index();
-            let newComment = { text: $comment.val(), user: $user.val() };
+            let request = { postId: postId, text: $comment.val(), user: $user.val() };
 
-            this.postsRepository.addComment(newComment, postIndex);
-            this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
-            $comment.val("");
-            $user.val("");
+            $.post('/posts/' + postId + '/comments', request, (newComment) => {
+                self.postsRepository.addComment(newComment, postIndex);
+                self.postsRenderer.renderComments(self.postsRepository.posts, postIndex);
+                $comment.val("");
+                $user.val("");
+            });
         });
-
     }
 
     registerRemoveComment() {
         this.$posts.on('click', '.remove-comment', (event) => {
+            let self = this;
             let $commentsList = $(event.currentTarget).closest('.post').find('.comments-list');
+            let postId = $(event.currentTarget).closest('.post').data('id');
             let postIndex = $(event.currentTarget).closest('.post').index();
+            let commentId = $(event.currentTarget).closest('.comment').data('id');
             let commentIndex = $(event.currentTarget).closest('.comment').index();
-            this.postsRepository.deleteComment(postIndex, commentIndex);
-            this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
+
+            $.ajax('/posts/' + postId + '/comments/' + commentId, {
+                method: "DELETE",
+                success: (post) => {
+                    self.postsRepository.deleteComment(postIndex, commentIndex);
+                    self.postsRenderer.renderComments(self.postsRepository.posts, postIndex);
+                },
+                error: function(err) {
+                    console.log('Error: ' + err);
+                }
+            });
         });
     }
 }
